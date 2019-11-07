@@ -9,9 +9,11 @@ class player_controller(Controller):
         # inputs = (inputs-min(inputs))/float((max(inputs)-min(inputs)))
 
         threshold = 0.5
-
-        output = controller.model.predict(inputs)
-
+        #print(np.array(inputs).reshape((1,20)))
+        output = controller.model.predict(np.array(inputs).reshape((1,20)))
+        #output = controller.model.predict(np.random.random((1,20)))
+        output=output[0]
+        #print(output)
         if output[0] > threshold:
             left = 1
         else:

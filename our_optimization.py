@@ -28,22 +28,25 @@ env = Environment(experiment_name=experiment_name,
                     level=2,
                     speed="fastest")
 
-enemies = (1,2,3,4)
+enemies = (1,8,3,4)
 
 class NeuroNet:
-    def __init__(self, weights):
+    def __init__(self, weights=None):
     # def __init__(self, _n_hidden):
         # Number of hidden neurons
         # self.n_hidden = [_n_hidden]
         model = Sequential()
-        model.add(Dense(14, activation='relu', input_dim=20)) # TODO: check right activation function
-        model.add(Dense(14, activation='relu'))               # TODO: check right activation function
-        model.add(Dense(5, activation='sigmoid'))
+        model.add(Dense(5, activation='relu', input_dim=20)) # TODO: check right activation function
+        #model.add(Dense(14, activation='relu'))               # TODO: check right activation function
+        model.add(Dense(5, activation='sigmoid')) # output
+        # model.add(Dense(5, bias_initializer='ones',kernel_initializer='random_uniform', activation='sigmoid'))
         # model.set_weights(weights)
         # model.compile(optimizer='rmsprop', loss='binary_crossentropy', metrics=['accuracy'])
         # model.fit(data,labels,epochs=10,batch_size=32)
         # predictions = model.predict(data)
-        model.set_weights(weights)
+        if (weights != None):
+            model.set_weights(weights)
+        # print(model.get_weights())
         # model.compile(optimizer='rmsprop', loss='binary_crossentropy', metrics=['accuracy'])
         self.model = model
 
@@ -51,7 +54,7 @@ class NeuroNet:
 
 # default environment fitness is assumed for experiment
 
-env.state_to_log() # checks environment state
+#env.state_to_log() # checks environment state
 
 
 ####   Optimization for controller solution (best genotype-weights for phenotype-network): Ganetic Algorihm    ###
@@ -77,6 +80,9 @@ def evaluate(x):
         fitness[i] = np.array(list(map(lambda y: simulation(env,y), x)))
     return fitness
     
+
+nn = NeuroNet()
+print(evaluate([nn]))
 
 fim = time.time() # prints total execution time for experiment
 
