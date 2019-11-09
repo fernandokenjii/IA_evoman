@@ -10,6 +10,7 @@ import numpy as np
 from math import fabs,sqrt
 import pickle
 import glob, os
+import math
 
 
 from keras.models import Sequential
@@ -62,8 +63,9 @@ def start_or_load(n_iter, n_pop):
 def muta(nn):
     return nn
     
-def seleciona(P, n):
-    pass
+def select(P, n):
+    sorted(P, key=lambda nn: nn.fitness, reverse=True) # sort from bigger to lower
+    return P[:n+1] # select n elements 
 
 ini = time.time()  # sets time marker
 
