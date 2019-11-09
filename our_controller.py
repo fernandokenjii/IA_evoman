@@ -1,19 +1,18 @@
 from controller import Controller
 import numpy as np
+from sklearn import preprocessing
 
 
 # implements controller structure for player
 class player_controller(Controller):
     def control(self, inputs, controller):
-        # # Normalises the input using min-max scaling
-        # inputs = (inputs-min(inputs))/float((max(inputs)-min(inputs)))
-
+        inputs = preprocessing.normalize(inputs.reshape(1, -1))
+        # for x in range (10000000):
+        #     pass
         threshold = 0.5
-        #print(np.array(inputs).reshape((1,20)))
-        output = controller.model.predict(np.array(inputs).reshape((1,20)))
-        #output = controller.model.predict(np.random.random((1,20)))
+        output = controller.model.predict(inputs)
         output=output[0]
-        #print(output)
+        
         if output[0] > threshold:
             left = 1
         else:
@@ -30,6 +29,12 @@ class player_controller(Controller):
             jump = 0
 
         if output[3] > threshold:
+            # if inputs[0][0] > 0 and inputs[0][2] == -1:
+            #     left=1
+            #     right=0
+            # elif inputs[0][0] < 0 and inputs[0][2] == 1:
+            #     left=0
+            #     right=1
             shoot = 1
         else:
             shoot = 0
