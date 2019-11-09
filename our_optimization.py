@@ -43,18 +43,19 @@ class NeuroNet:
         self.model = model
 
 def GA(n_iter, n_pop):
-    start, P = start_or_load(n_pop)
+    start, P = start_or_load(n_iter, n_pop)
     for it in range(start, n_iter):
         fitness = evaluate(P)
         pickle.dump([it+1, P], open(experiment_name+'/Evoman.pkl', 'wb'))
     # os.remove('Evoman.pkl')
         
-    return melhor(P)
+    return P
 
-def start_or_load(n_pop):
+def start_or_load(n_iter, n_pop):
     if os.path.exists(experiment_name+'/Evoman.pkl'):
         a = pickle.load(open(experiment_name+'/Evoman.pkl', 'rb'))
-        return a[0], a[1]
+        if a[0] < n_iter:
+            return a[0], a[1]
     return 0, [NeuroNet() for _ in range(n_pop)]
     
 def muta(nn):
@@ -81,7 +82,7 @@ def evaluate(x):
 
 
 
-GA(2,2)
+GA(3,2)
 
 fim = time.time() # prints total execution time for experiment
 
