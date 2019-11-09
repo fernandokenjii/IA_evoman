@@ -8,6 +8,7 @@ from our_controller import player_controller
 import time
 import numpy as np
 from math import fabs,sqrt
+import pickle
 import glob, os
 
 
@@ -28,49 +29,46 @@ env = Environment(experiment_name=experiment_name,
                     level=2,
                     speed="fastest")
 
-enemies = (1,8,3,4)
+enemies = (3,4,6,7)
 
 class NeuroNet:
     def __init__(self, weights=None):
-    # def __init__(self, _n_hidden):
-        # Number of hidden neurons
-        # self.n_hidden = [_n_hidden]
         model = Sequential()
-        model.add(Dense(5, activation='relu', input_dim=20)) # TODO: check right activation function
-        #model.add(Dense(14, activation='relu'))               # TODO: check right activation function
+        model.add(Dense(5, activation='tanh', input_dim=20)) # TODO: check right activation function
         model.add(Dense(5, activation='sigmoid')) # output
-        # model.add(Dense(5, bias_initializer='ones',kernel_initializer='random_uniform', activation='sigmoid'))
-        # model.set_weights(weights)
-        # model.compile(optimizer='rmsprop', loss='binary_crossentropy', metrics=['accuracy'])
-        # model.fit(data,labels,epochs=10,batch_size=32)
-        # predictions = model.predict(data)
+
         if (weights != None):
             model.set_weights(weights)
-        # print(model.get_weights())
-        # model.compile(optimizer='rmsprop', loss='binary_crossentropy', metrics=['accuracy'])
+
         self.model = model
 
+def GA(n_iter, n_pop):
+    start, P = start_or_load(n_pop)
+    for it in range(start, n_iter):
+        fitness = evaluate(P)
+        pickle.dump([it+1, P], open(experiment_name+'/Evoman.pkl', 'wb'))
+    # os.remove('Evoman.pkl')
+        
+    return melhor(P)
 
-
-# default environment fitness is assumed for experiment
-
-#env.state_to_log() # checks environment state
-
-
-####   Optimization for controller solution (best genotype-weights for phenotype-network): Ganetic Algorihm    ###
+def start_or_load(n_pop):
+    if os.path.exists(experiment_name+'/Evoman.pkl'):
+        a = pickle.load(open(experiment_name+'/Evoman.pkl', 'rb'))
+        return a[0], a[1]
+    return 0, [NeuroNet() for _ in range(n_pop)]
+    
+def muta(nn):
+    return nn
+    
+def seleciona(P, n):
+    pass
 
 ini = time.time()  # sets time marker
-
-
-# genetic algorithm params
-
-
 
 # runs simulation
 def simulation(env,x):
     f,p,e,t = env.play(pcont=x) #fitness, playerlife, enemylife, gametime
     return f
-
 
 # evaluation
 def evaluate(x):
@@ -81,8 +79,9 @@ def evaluate(x):
     return fitness
     
 
-nn = NeuroNet()
-print(evaluate([nn]))
+
+
+GA(2,2)
 
 fim = time.time() # prints total execution time for experiment
 
