@@ -70,8 +70,8 @@ def start_or_load(n_iter, n_pop):
 
 def calc_weights(nn, alpha):
     weights = nn.get_weights()
-    new_weights = [0] * 2
-    for i, weight in evaluate(weights):
+    new_weights = [0] * 4
+    for i, weight in enumerate(weights):
         new_weights[i] = weight * alpha
     return new_weights
 
@@ -80,10 +80,10 @@ def crossover(P, n):
     weight1 = calc_weights(P[0], 0.8)
     for i in range(1, n):
         weight2 = calc_weights(P[i], 0.2)
-        F = F + NeuroNet(weight1 + weight2)
+        F = F + [NeuroNet(weight1 + weight2)]
     weight1 = calc_weights(P[1], 0.8)
     weight2 = calc_weights(P[2], 0.2)
-    F = F + NeuroNet(weight1 + weight2)
+    F = F + [NeuroNet(weight1 + weight2)]
     return F
     
 def muta(nn):
