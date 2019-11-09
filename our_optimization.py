@@ -41,6 +41,7 @@ class NeuroNet:
             model.set_weights(weights)
 
         self.model = model
+        self.fitness = -math.inf
 
 def GA(n_iter, n_pop):
     start, P = start_or_load(n_iter, n_pop)
@@ -67,8 +68,10 @@ def seleciona(P, n):
 ini = time.time()  # sets time marker
 
 # runs simulation
-def simulation(env,x):
-    f,p,e,t = env.play(pcont=x) #fitness, playerlife, enemylife, gametime
+def simulation(env,y):
+    if y.fitness > -math.inf:
+        return y.fitness
+    f,p,e,t = env.play(pcont=y) #fitness, playerlife, enemylife, gametime
     return f
 
 # evaluation
@@ -76,7 +79,11 @@ def evaluate(x):
     fitness=[0]* len(enemies)
     for i, en in enumerate(enemies):
         env.update_parameter('enemies', [en])
-        fitness[i] = np.array(list(map(lambda y: simulation(env,y), x)))
+        fitness[i] = (list(map(lambda y: simulation(env,y), x)))
+    fitness = np.array(fitness).sum(axis=0)
+    for i, y in enumerate(x):
+        y.fitness = fitness[i]
+
     return fitness
     
 
