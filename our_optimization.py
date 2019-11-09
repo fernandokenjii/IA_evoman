@@ -37,12 +37,13 @@ class NeuroNet:
         model = Sequential()
         model.add(Dense(5, activation='tanh', input_dim=20)) # TODO: check right activation function
         model.add(Dense(5, activation='sigmoid')) # output
-
         if (weights != None):
             model.set_weights(weights)
-
         self.model = model
         self.fitness = -math.inf
+
+    def get_weights(self):
+        return self.model.get_weights()
 
 def GA(n_iter, n_pop):
     start, P = start_or_load(n_iter, n_pop)
@@ -67,14 +68,21 @@ def start_or_load(n_iter, n_pop):
             return a[0], a[1]
     return 0, [NeuroNet() for _ in range(n_pop)]
 
+def calc_weights(nn, alpha):
+    weights = nn.get_weights()
+    new_weights = [0] * 2
+    for i, weight in evaluate(weights):
+        new_weights[i] = weight * alpha
+    return new_weights
+
 def crossover(P, n):
     F=[]
-    weight1 = P[0].model.get_weights * 0.8
+    weight1 = calc_weights(P[0], 0.8)
     for i in range(1, n):
-        weight2 = P[i].model.get_weights * 0.2
+        weight2 = calc_weights(P[i], 0.2)
         F = F + NeuroNet(weight1 + weight2)
-    weight1 = P[1].model.get_weights * 0.8
-    weight2 = P[2].model.get_weights * 0.2
+    weight1 = calc_weights(P[1], 0.8)
+    weight2 = calc_weights(P[2], 0.2)
     F = F + NeuroNet(weight1 + weight2)
     return F
     
