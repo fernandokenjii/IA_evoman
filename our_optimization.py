@@ -46,8 +46,15 @@ class NeuroNet:
 
 def GA(n_iter, n_pop):
     start, P = start_or_load(n_iter, n_pop)
+    if start == 0:
+        evaluate(P)
+    f_num = 10
     for it in range(start, n_iter):
-        fitness = evaluate(P)
+        Psel = select(P, f_num)
+        F = crossover(Psel, f_num)
+        evaluate(F)
+        P = P + F
+        P = select(P, n_pop)
         pickle.dump([it+1, P], open(experiment_name+'/Evoman.pkl', 'wb'))
     # os.remove('Evoman.pkl')
         
@@ -59,6 +66,17 @@ def start_or_load(n_iter, n_pop):
         if a[0] < n_iter:
             return a[0], a[1]
     return 0, [NeuroNet() for _ in range(n_pop)]
+
+def crossover(P, n):
+    F=[]
+    weight1 = P[0].model.get_weights * 0.8
+    for i in range(1, n):
+        weight2 = P[i].model.get_weights * 0.2
+        F = F + NeuroNet(weight1 + weight2)
+    weight1 = P[1].model.get_weights * 0.8
+    weight2 = P[2].model.get_weights * 0.2
+    F = F + NeuroNet(weight1 + weight2)
+    return F
     
 def muta(nn):
     return nn
@@ -91,7 +109,7 @@ def evaluate(x):
 
 
 
-GA(3,2)
+GA(30,20)
 
 fim = time.time() # prints total execution time for experiment
 
