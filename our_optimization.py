@@ -79,19 +79,19 @@ def crossover(P, n):
     F=[]
     weight1 = calc_weights(P[0], 0.8)
     for i in range(1, n):
+        weight = [0]*4
         weight2 = calc_weights(P[i], 0.2)
-        F = F + [NeuroNet(weight1 + weight2)]
-    weight1 = calc_weights(P[1], 0.8)
-    weight2 = calc_weights(P[2], 0.2)
-    F = F + [NeuroNet(weight1 + weight2)]
+        for j in range(4):
+            weight[j] = weight1[j] + weight2[j]
+        F = F + [NeuroNet(weight)]
     return F
     
 def muta(nn):
     return nn
     
 def select(P, n):
-    sorted(P, key=lambda nn: nn.fitness, reverse=True) # sort from bigger to lower
-    return P[:n+1] # select n elements 
+    P.sort(key=lambda nn: nn.fitness, reverse=True) # sort from bigger to lower
+    return P[:n]
 
 ini = time.time()  # sets time marker
 
