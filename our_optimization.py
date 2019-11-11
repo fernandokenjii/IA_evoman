@@ -22,20 +22,22 @@ if not os.path.exists(experiment_name):
 
 
 # initializes simulation in individual evolution mode, for single static enemy.
-env = Environment(experiment_name=experiment_name,
-                    enemies=[1],
-                    playermode="ai",
-                    player_controller=player_controller(),
-                    enemymode="static",
-                    level=2,
-                    speed="fastest")
+env = Environment(
+    experiment_name=experiment_name,
+    enemies=[1],
+    playermode="ai",
+    player_controller=player_controller(),
+    enemymode="static",
+    level=2,
+    speed="fastest"
+)
 
 enemies = (3,4,6,7)
 
 class NeuroNet:
     def __init__(self, weights=None):
         model = Sequential()
-        model.add(Dense(5, activation='tanh', input_dim=20)) # TODO: check right activation function
+        model.add(Dense(5, activation='relu', input_dim=20)) # TODO: check right activation function
         model.add(Dense(5, activation='sigmoid')) # output
         if (weights != None):
             model.set_weights(weights)
@@ -52,13 +54,13 @@ def GA(n_iter, n_pop):
     f_num = 10
     for it in range(start, n_iter):
         Psel = select(P, f_num)
-        F = crossover(Psel, f_num)
+        F = [muta(nn) for nn in crossover(Psel, f_num)]
         evaluate(F)
         P = P + F
         P = select(P, n_pop)
         pickle.dump([it+1, P], open(experiment_name+'/Evoman.pkl', 'wb'))
     # os.remove('Evoman.pkl')
-        
+
     return P
 
 def start_or_load(n_iter, n_pop):
@@ -77,18 +79,24 @@ def calc_weights(nn, alpha):
 
 def crossover(P, n):
     F=[]
-    weight1 = calc_weights(P[0], 0.8)
+    weight1 = calc_weights(P[0], 0.5)
     for i in range(1, n):
         weight = [0]*4
-        weight2 = calc_weights(P[i], 0.2)
+        weight2 = calc_weights(P[i], 0.5)
         for j in range(4):
             weight[j] = weight1[j] + weight2[j]
         F = F + [NeuroNet(weight)]
     return F
-    
+
 def muta(nn):
+    weights = nn.get_weights()
+    fstLayer = weights[0]
+    index = np.random.randint(0, len(fstLayer))
+    gene = fstLayer[index]
+    index2 = np.random.randint(0, len(gene))
+    gene[index2] = gene[index2] + np.random.normal(0, 0.1)
     return nn
-    
+
 def select(P, n):
     P.sort(key=lambda nn: nn.fitness, reverse=True) # sort from bigger to lower
     return P[:n]
@@ -113,8 +121,6 @@ def evaluate(x):
         y.fitness = fitness[i]
 
     return fitness
-    
-
 
 
 GA(30,20)
