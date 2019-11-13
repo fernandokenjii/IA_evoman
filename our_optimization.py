@@ -20,13 +20,14 @@ experiment_name = 'our_tests'
 if not os.path.exists(experiment_name):
     os.makedirs(experiment_name)
 
+player_controller = player_controller()
 
 # initializes simulation in individual evolution mode, for single static enemy.
 env = Environment(
     experiment_name=experiment_name,
     enemies=[1],
     playermode="ai",
-    player_controller=player_controller(),
+    player_controller=player_controller,
     enemymode="static",
     level=2,
     speed="fastest"
@@ -123,7 +124,13 @@ def evaluate(x):
 
     return fitness
 
+def fit_scale():
+    for en in enemies:
+        env.update_parameter('enemies', [en])
+        env.play()
+    player_controller.fit_scale()
 
+fit_scale()
 GA(30,20)
 
 fim = time.time() # prints total execution time for experiment
