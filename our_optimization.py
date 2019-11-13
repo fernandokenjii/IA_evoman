@@ -95,6 +95,7 @@ def muta(nn):
     gene = fstLayer[index]
     index2 = np.random.randint(0, len(gene))
     gene[index2] = gene[index2] + np.random.normal(0, 0.1)
+    nn.model.set_weights(weights)
     return nn
 
 def select(P, n):
