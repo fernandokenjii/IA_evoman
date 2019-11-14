@@ -52,10 +52,10 @@ def GA(n_iter, n_pop):
     start, P = start_or_load(n_iter, n_pop)
     if start == 0:
         evaluate(P)
-    f_num = 10
+    f_num = 20
     for it in range(start, n_iter):
         Psel = select(P, f_num)
-        F = [muta(nn) for nn in crossover(Psel, f_num)]
+        F = [muta(nn) for nn in crossover2(Psel, f_num)]
         evaluate(F)
         P = P + F
         P = select(P, n_pop)
@@ -87,6 +87,19 @@ def crossover(P, n):
         for j in range(4):
             weight[j] = weight1[j] + weight2[j]
         F = F + [NeuroNet(weight)]
+    return F
+
+def crossover2(P, n):
+    F = []
+    pairs = np.random.choice(P, (n//2, 2), False)
+    for pair in pairs:
+        a = np.random.random()
+        w1 = calc_weights(pair[0], a)
+        w2 = calc_weights(pair[1], 1 - a)
+        w = [0] * 4
+        for i in range(4):
+            w[i] = w1[i] + w2[i]
+        F = F + [NeuroNet(w)]
     return F
 
 def muta(nn):
