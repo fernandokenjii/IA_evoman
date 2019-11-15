@@ -92,7 +92,7 @@ def crossover(P, n):
     weight1 = calc_weights(P[0], 0.5)
     for i in range(1, n):
         weight2 = calc_weights(P[i], 0.5)
-        weight = [(weight1[j] + weight2[j]) for j in len(weight1)]
+        weight = [(weight1[j] + weight2[j]) for j in range(len(weight1))]
         F.append( NeuroNet(weight) )
     return F
 
@@ -103,7 +103,7 @@ def crossover2(P, n):
         a = np.random.random()
         w1 = calc_weights(pair[0], a)
         w2 = calc_weights(pair[1], 1 - a)
-        w = [(w1[j] + w2[j]) for j in len(w1)]
+        w = [(w1[j] + w2[j]) for j in range(len(w1))]
         F.append( NeuroNet(w) )
     return F
 
