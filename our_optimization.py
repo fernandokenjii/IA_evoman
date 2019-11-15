@@ -15,6 +15,7 @@ import math
 
 from keras.models import Sequential
 from keras.layers import Dense
+import keras.initializers as keras_init
 
 experiment_name = 'our_tests'
 if not os.path.exists(experiment_name):
@@ -38,7 +39,8 @@ enemies = (3,4,6,7)
 class NeuroNet:
     def __init__(self, weights=None):
         model = Sequential()
-        model.add(Dense(5, activation='relu', input_dim=20)) # TODO: check right activation function
+        model.add(Dense(8, kernel_initializer=keras_init.RandomUniform(minval=-1., maxval=1.), activation='tanh', input_dim=20)) # TODO: check right activation function
+        #model.add(Dense(6, kernel_initializer=keras_init.RandomUniform(minval=-0.5, maxval=0.5), activation='tanh')) # TODO: check right activation function
         model.add(Dense(5, activation='sigmoid')) # output
         if (weights != None):
             model.set_weights(weights)
@@ -54,6 +56,8 @@ def GA(n_iter, n_pop):
         evaluate(P)
     f_num = 10
     for it in range(start, n_iter):
+        print(it)
+        print(P[0].fitness)
         Psel = select(P, f_num)
         F = [muta(nn) for nn in crossover(Psel, f_num)]
         evaluate(F)
@@ -61,7 +65,14 @@ def GA(n_iter, n_pop):
         P = select(P, n_pop)
         pickle.dump([it+1, P], open(experiment_name+'/Evoman.pkl', 'wb'))
     # os.remove('Evoman.pkl')
-
+    env.update_parameter('speed', "normal")
+    for en in enemies:
+        env.update_parameter('enemies', [en])
+        simulation(env, P[0])
+    others = [en for en in range(1, 9) if en not in enemies]
+    for en in others:
+        env.update_parameter('enemies', [en])
+        simulation(env, P[0])
     return P
 
 def start_or_load(n_iter, n_pop):
@@ -107,8 +118,8 @@ ini = time.time()  # sets time marker
 
 # runs simulation
 def simulation(env,y):
-    if y.fitness > -math.inf:
-        return y.fitness
+    #if y.fitness > -math.inf:
+    #    return y.fitness
     f,p,e,t = env.play(pcont=y) #fitness, playerlife, enemylife, gametime
     return f
 
