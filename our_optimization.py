@@ -129,7 +129,10 @@ def evaluate(x):
     for i, en in enumerate(enemies):
         env.update_parameter('enemies', [en])
         fitness[i] = (list(map(lambda y: simulation(env,y), x)))
-    fitness = np.array(fitness).sum(axis=0)
+    arrray = np.array(fitness)
+    fitness = arrray.sum(axis=0)
+    fitness /= 8
+    fitness += arrray.min(axis=0)
     for i, y in enumerate(x):
         y.fitness = fitness[i]
 
