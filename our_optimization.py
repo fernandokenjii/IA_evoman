@@ -84,20 +84,16 @@ def start_or_load(n_iter, n_pop):
 
 def calc_weights(nn, alpha):
     weights = nn.get_weights()
-    new_weights = [0] * 4
-    for i, weight in enumerate(weights):
-        new_weights[i] = weight * alpha
+    new_weights = [(weight * alpha) for weight in weights]
     return new_weights
 
 def crossover(P, n):
     F=[]
     weight1 = calc_weights(P[0], 0.5)
     for i in range(1, n):
-        weight = [0]*4
         weight2 = calc_weights(P[i], 0.5)
-        for j in range(4):
-            weight[j] = weight1[j] + weight2[j]
-        F = F + [NeuroNet(weight)]
+        weight = [(weight1[j] + weight2[j]) for j in len(weight1)]
+        F.append( NeuroNet(weight) )
     return F
 
 def crossover2(P, n):
@@ -107,10 +103,8 @@ def crossover2(P, n):
         a = np.random.random()
         w1 = calc_weights(pair[0], a)
         w2 = calc_weights(pair[1], 1 - a)
-        w = [0] * 4
-        for i in range(4):
-            w[i] = w1[i] + w2[i]
-        F = F + [NeuroNet(w)]
+        w = [(w1[j] + w2[j]) for j in len(w1)]
+        F.append( NeuroNet(w) )
     return F
 
 def muta(nn):
@@ -138,10 +132,10 @@ def simulation(env,y):
 
 # evaluation
 def evaluate(x):
-    fitness=[0]* len(enemies)
+    fitness=[]
     for i, en in enumerate(enemies):
         env.update_parameter('enemies', [en])
-        fitness[i] = (list(map(lambda y: simulation(env,y), x)))
+        fitness.append((list(map(lambda y: simulation(env,y), x))))
     arrray = np.array(fitness)
     fitness = arrray.sum(axis=0)
     fitness /= 8
