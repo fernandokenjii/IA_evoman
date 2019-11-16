@@ -1,19 +1,26 @@
 from controller import Controller
 import numpy as np
+from sklearn.preprocessing import MinMaxScaler
 
 
 # implements controller structure for player
 class player_controller(Controller):
-    def control(self, inputs, controller):
-        # # Normalises the input using min-max scaling
-        # inputs = (inputs-min(inputs))/float((max(inputs)-min(inputs)))
+    def __init__(self):
+        self.scale = MinMaxScaler()
+        self.x_train = []
 
+    def control(self, inputs, controller):
+        if controller is 'None':
+            self.x_train.append(inputs)
+            return [np.random.choice([1,0]) for _ in range(5)]
+            
+        inputs = self.scale.transform([inputs])
+        # for x in range (10000000):
+        #     pass
         threshold = 0.5
-        #print(np.array(inputs).reshape((1,20)))
-        output = controller.model.predict(np.array(inputs).reshape((1,20)))
-        #output = controller.model.predict(np.random.random((1,20)))
+        output = controller.model.predict(inputs)
         output=output[0]
-        #print(output)
+        
         if output[0] > threshold:
             left = 1
         else:
@@ -30,6 +37,12 @@ class player_controller(Controller):
             jump = 0
 
         if output[3] > threshold:
+            # if inputs[0][0] > 0 and inputs[0][2] == -1:
+            #     left=1
+            #     right=0
+            # elif inputs[0][0] < 0 and inputs[0][2] == 1:
+            #     left=0
+            #     right=1
             shoot = 1
         else:
             shoot = 0
@@ -40,3 +53,5 @@ class player_controller(Controller):
             release = 0
 
         return [left, right, jump, shoot, release]
+    def fit_scale(self):
+        self.scale.fit(self.x_train)
