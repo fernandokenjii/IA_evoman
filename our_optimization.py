@@ -63,7 +63,7 @@ def GA(n_iter, n_pop):
         evaluate(F)
         P = P + F
         P = select(P, n_pop)
-        pickle.dump([it+1, P, player_controller], open(experiment_name+'/Evoman.pkl', 'wb'))
+        pickle.dump([it+1, P, player_controller.get_data()], open(experiment_name+'/Evoman.pkl', 'wb'))
     # os.remove('Evoman.pkl')
     env.update_parameter('speed', "normal")
     for en in enemies:
@@ -79,7 +79,7 @@ def start_or_load(n_iter, n_pop):
     if os.path.exists(experiment_name+'/Evoman.pkl'):
         a = pickle.load(open(experiment_name+'/Evoman.pkl', 'rb'))
         if a[0] < n_iter:
-            env.update_parameter('player_controller', a[2])
+            player_controller.set_data(a[2])
             return a[0], a[1]
     fit_scale()
     return 0, [NeuroNet() for _ in range(n_pop)]
