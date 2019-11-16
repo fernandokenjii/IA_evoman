@@ -55,10 +55,3 @@ class player_controller(Controller):
         return [left, right, jump, shoot, release]
     def fit_scale(self):
         self.scale.fit(self.x_train)
-
-    def get_data(self):
-        return self.x_train
-
-    def set_data(self, data):
-        self.x_train = data
-        self.scale.fit(self.x_train)
