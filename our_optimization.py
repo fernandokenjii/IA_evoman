@@ -111,11 +111,14 @@ def crossover2(P, n):
 
 def muta(nn):
     weights = nn.get_weights()
-    fstLayer = weights[0]
-    index = np.random.randint(0, len(fstLayer))
-    gene = fstLayer[index]
-    index2 = np.random.randint(0, len(gene))
-    gene[index2] = gene[index2] + np.random.normal(0, 0.1)
+    for layer in weights:
+        if len(np.shape(layer)) > 1:
+            for gene in layer:
+                idx = np.random.randint(0, len(gene))
+                gene[idx] += np.random.normal(0, 0.1)
+        else:
+            idx = np.random.randint(0, len(layer))
+            layer[idx] += np.random.normal(0, 0.1)
     nn.model.set_weights(weights)
     return nn
 
@@ -135,7 +138,7 @@ def simulation(env,y):
 # evaluation
 def evaluate(x):
     fitness=[]
-    for i, en in enumerate(enemies):
+    for en in enemies:
         env.update_parameter('enemies', [en])
         fitness.append((list(map(lambda y: simulation(env,y), x))))
     arrray = np.array(fitness)
