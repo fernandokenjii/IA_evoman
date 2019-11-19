@@ -51,10 +51,10 @@ class NeuroNet:
         return self.model.get_weights()
 
 def GA(n_iter, n_pop):
+    f_num = 20
     start, P = start_or_load(n_iter, n_pop)
     if start == 0:
         evaluate(P)
-    f_num = 20
     for it in range(start, n_iter):
         print(it)
         print(P[0].fitness)
@@ -130,8 +130,6 @@ ini = time.time()  # sets time marker
 
 # runs simulation
 def simulation(env,y):
-    #if y.fitness > -math.inf:
-    #    return y.fitness
     f,p,e,t = env.play(pcont=y) #fitness, playerlife, enemylife, gametime
     return f
 

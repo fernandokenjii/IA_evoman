@@ -10,14 +10,13 @@ class player_controller(Controller):
         self.x_train = []
 
     def control(self, inputs, controller):
+        threshold = 0.5
+
         if controller is 'None':
             self.x_train.append(inputs)
             return [np.random.choice([1,0]) for _ in range(5)]
-            
+
         inputs = self.scale.transform([inputs])
-        # for x in range (10000000):
-        #     pass
-        threshold = 0.5
         output = controller.model.predict(inputs)
         output=output[0]
         actions = np.where(output>threshold, 1, 0)
