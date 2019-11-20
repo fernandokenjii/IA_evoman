@@ -31,15 +31,16 @@ env = Environment(
     player_controller=player_controller,
     enemymode="static",
     level=2,
-    speed="fastest"
+    speed="fastest",
+    timeexpire=600
 )
 
-enemies = (3,4,6,7)
+enemies = (1,3,6,7)
 
 class NeuroNet:
     def __init__(self, weights=None):
         model = Sequential()
-        model.add(Dense(8, kernel_initializer=keras_init.RandomUniform(minval=-1., maxval=1.), activation='tanh', input_dim=20)) # TODO: check right activation function
+        model.add(Dense(8, kernel_initializer=keras_init.RandomUniform(minval=-.5, maxval=.5), activation='tanh', input_dim=20)) # TODO: check right activation function
         #model.add(Dense(6, kernel_initializer=keras_init.RandomUniform(minval=-0.5, maxval=0.5), activation='tanh')) # TODO: check right activation function
         model.add(Dense(5, activation='sigmoid')) # output
         if (weights != None):
@@ -51,18 +52,23 @@ class NeuroNet:
         return self.model.get_weights()
 
 def GA(n_iter, n_pop):
-    f_num = 20
+    f_num = n_pop
     start, P = start_or_load(n_iter, n_pop)
     if start == 0:
         evaluate(P)
     for it in range(start, n_iter):
         print(it)
         print(P[0].fitness)
-        Psel = select(P, f_num)
-        F = [muta(nn) for nn in crossover2(Psel, f_num)]
+        F = [muta(nn) for nn in crossover2(P, f_num)]
         evaluate(F)
-        P = P + F
+        F += [muta(nn) for nn in P]
+        P = F
         P = select(P, n_pop)
+        if it%10 == 0 and it != 0:
+            P = P[:3]
+            N = [NeuroNet() for _ in range(f_num-3)]
+            evaluate(N)
+            P += N
         pickle.dump([it+1, P, player_controller.scale], open(experiment_name+'/Evoman.pkl', 'wb'))
     # os.remove('Evoman.pkl')
     env.update_parameter('speed', "normal")
@@ -111,16 +117,20 @@ def crossover2(P, n):
 
 def muta(nn):
     weights = nn.get_weights()
-    for layer in weights:
-        if len(np.shape(layer)) > 1:
-            for gene in layer:
-                idx = np.random.randint(0, len(gene))
-                gene[idx] += np.random.normal(0, 0.1)
-        else:
-            idx = np.random.randint(0, len(layer))
-            layer[idx] += np.random.normal(0, 0.1)
-    nn.model.set_weights(weights)
-    return nn
+    F = []
+    for _ in range(5):
+        f = []
+        for layer in weights:
+            l=[]
+            shape = layer.shape
+            for gene in np.nditer(layer):
+                l.append(gene + np.random.normal(0, 0.5))
+            l = np.array(l).reshape(shape)
+            f.append(l)
+        F.append( NeuroNet(f) )
+    evaluate(F)
+    F.append(nn)
+    return select(F, 1)[0]
 
 def select(P, n):
     P.sort(key=lambda nn: nn.fitness, reverse=True) # sort from bigger to lower
@@ -154,7 +164,7 @@ def fit_scale():
         env.play()
     player_controller.fit_scale()
 
-GA(30,20)
+GA(60,10)
 
 fim = time.time() # prints total execution time for experiment
 
