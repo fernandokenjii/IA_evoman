@@ -40,8 +40,8 @@ enemies = (1,3,6,7)
 class NeuroNet:
     def __init__(self, weights=None):
         model = Sequential()
-        model.add(Dense(8, kernel_initializer=keras_init.RandomUniform(minval=-.5, maxval=.5), activation='tanh', input_dim=20)) # TODO: check right activation function
-        #model.add(Dense(6, kernel_initializer=keras_init.RandomUniform(minval=-0.5, maxval=0.5), activation='tanh')) # TODO: check right activation function
+        model.add(Dense(20, kernel_initializer=keras_init.RandomUniform(minval=-.5, maxval=.5), activation='tanh', input_dim=10)) # TODO: check right activation function
+        # model.add(Dense(10, kernel_initializer=keras_init.RandomUniform(minval=-0.5, maxval=0.5), activation='tanh')) # TODO: check right activation function
         model.add(Dense(5, activation='sigmoid')) # output
         if (weights != None):
             model.set_weights(weights)
@@ -60,7 +60,7 @@ def GA(n_iter, n_pop):
         print(it)
         print(P[0].fitness)
         F = [muta(nn) for nn in crossover2(P, f_num)]
-        evaluate(F)
+        # evaluate(F)
         F += [muta(nn) for nn in P]
         P = F
         P = select(P, n_pop)
@@ -113,6 +113,7 @@ def crossover2(P, n):
         w2 = calc_weights(pair[1], 1 - a)
         w = [(w1[j] + w2[j]) for j in range(len(w1))]
         F.append( NeuroNet(w) )
+    evaluate(F)
     return F
 
 def muta(nn):
@@ -161,7 +162,8 @@ def evaluate(x):
 def fit_scale():
     for en in enemies:
         env.update_parameter('enemies', [en])
-        env.play()
+        for _ in range(10):
+            env.play()
     player_controller.fit_scale()
 
 GA(60,10)
