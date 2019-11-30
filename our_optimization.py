@@ -13,10 +13,6 @@ import glob, os
 import math
 
 
-from keras.models import Sequential
-from keras.layers import Dense
-import keras.initializers as keras_init
-
 experiment_name = 'our_tests'
 if not os.path.exists(experiment_name):
     os.makedirs(experiment_name)
@@ -38,17 +34,16 @@ enemies = (3,4,6,7)
 
 class NeuroNet:
     def __init__(self, weights=None):
-        model = Sequential()
-        model.add(Dense(8, kernel_initializer=keras_init.RandomUniform(minval=-1., maxval=1.), activation='tanh', input_dim=20)) # TODO: check right activation function
-        #model.add(Dense(6, kernel_initializer=keras_init.RandomUniform(minval=-0.5, maxval=0.5), activation='tanh')) # TODO: check right activation function
-        model.add(Dense(5, activation='sigmoid')) # output
-        if (weights != None):
-            model.set_weights(weights)
-        self.model = model
+        self.weights = []
+        if (weights is not None):
+            self.weights = weights
+        else:
+            for shape in player_controller.get_shapes():
+                self.weights.append(np.random.uniform(-1, 1, shape))
         self.fitness = -math.inf
 
     def get_weights(self):
-        return self.model.get_weights()
+        return self.weights
 
 def GA(n_iter, n_pop):
     start, P = start_or_load(n_iter, n_pop)
@@ -58,11 +53,16 @@ def GA(n_iter, n_pop):
     for it in range(start, n_iter):
         print(it)
         print(P[0].fitness)
-        Psel = select(P, f_num)
-        F = [muta(nn) for nn in crossover2(Psel, f_num)]
-        evaluate(F)
-        P = P + F
+        F = [muta(nn, 0.5) for nn in crossover2(P, f_num)]
+        F += [muta(nn, 1-(0.01*it)) for nn in P]
+        P = F
         P = select(P, n_pop)
+        if it%20 == 0 and it != 0:
+            P = P[:5]
+            N = [NeuroNet() for _ in range(f_num-5)]
+            evaluate(N)
+            F = [muta(nn, 0.5) for nn in N]
+            P += F
         pickle.dump([it+1, P, player_controller.scale], open(experiment_name+'/Evoman.pkl', 'wb'))
     # os.remove('Evoman.pkl')
     env.update_parameter('speed', "normal")
@@ -109,18 +109,22 @@ def crossover2(P, n):
         F.append( NeuroNet(w) )
     return F
 
-def muta(nn):
+def muta(nn, alpha):
     weights = nn.get_weights()
-    for layer in weights:
-        if len(np.shape(layer)) > 1:
-            for gene in layer:
-                idx = np.random.randint(0, len(gene))
-                gene[idx] += np.random.normal(0, 0.1)
-        else:
-            idx = np.random.randint(0, len(layer))
-            layer[idx] += np.random.normal(0, 0.1)
-    nn.model.set_weights(weights)
-    return nn
+    F = []
+    for _ in range(5):
+        f = []
+        for layer in weights:
+            l=[]
+            shape = layer.shape
+            for gene in np.nditer(layer):
+                l.append(gene + np.random.normal(0, alpha))
+            l = np.array(l).reshape(shape)
+            f.append(l)
+        F.append( NeuroNet(f) )
+    evaluate(F)
+    F.append(nn)
+    return select(F, 1)[0]
 
 def select(P, n):
     P.sort(key=lambda nn: nn.fitness, reverse=True) # sort from bigger to lower
@@ -130,8 +134,8 @@ ini = time.time()  # sets time marker
 
 # runs simulation
 def simulation(env,y):
-    #if y.fitness > -math.inf:
-    #    return y.fitness
+    print(y.get_weights())
+    player_controller.set_weights(y.get_weights())
     f,p,e,t = env.play(pcont=y) #fitness, playerlife, enemylife, gametime
     return f
 
@@ -153,11 +157,9 @@ def evaluate(x):
 def fit_scale():
     for en in enemies:
         env.update_parameter('enemies', [en])
-        env.play()
+        for _ in range(10):
+            env.play()
     player_controller.fit_scale()
+GA(100,10)
 
-GA(30,20)
 
-fim = time.time() # prints total execution time for experiment
-
-env.state_to_log() # checks environment state
