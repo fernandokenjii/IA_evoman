@@ -41,7 +41,7 @@ class NeuroNet:
     def __init__(self, weights=None):
         model = Sequential()
         model.add(Dense(20, kernel_initializer=keras_init.RandomUniform(minval=-.5, maxval=.5), activation='tanh', input_dim=10)) # TODO: check right activation function
-        # model.add(Dense(10, kernel_initializer=keras_init.RandomUniform(minval=-0.5, maxval=0.5), activation='tanh')) # TODO: check right activation function
+        model.add(Dense(10, kernel_initializer=keras_init.RandomUniform(minval=-0.5, maxval=0.5), activation='tanh')) # TODO: check right activation function
         model.add(Dense(5, activation='sigmoid')) # output
         if (weights != None):
             model.set_weights(weights)
@@ -54,21 +54,22 @@ class NeuroNet:
 def GA(n_iter, n_pop):
     f_num = n_pop
     start, P = start_or_load(n_iter, n_pop)
+    alpha_muta = 1/n_iter
     if start == 0:
         evaluate(P)
     for it in range(start, n_iter):
         print(it)
         print(P[0].fitness)
-        F = [muta(nn) for nn in crossover2(P, f_num)]
-        # evaluate(F)
-        F += [muta(nn) for nn in P]
+        F = [muta(nn, 0.5) for nn in crossover2(P, f_num)]
+        F += [muta(nn, 1-(alpha_muta*it)) for nn in P]
         P = F
         P = select(P, n_pop)
-        if it%10 == 0 and it != 0:
-            P = P[:3]
-            N = [NeuroNet() for _ in range(f_num-3)]
+        if it%20 == 0 and it != 0:
+            P = P[:5]
+            N = [NeuroNet() for _ in range(f_num-5)]
             evaluate(N)
-            P += N
+            F = [muta(nn, 0.5) for nn in N]
+            P += F
         pickle.dump([it+1, P, player_controller.scale], open(experiment_name+'/Evoman.pkl', 'wb'))
     # os.remove('Evoman.pkl')
     env.update_parameter('speed', "normal")
@@ -116,7 +117,7 @@ def crossover2(P, n):
     evaluate(F)
     return F
 
-def muta(nn):
+def muta(nn, alpha):
     weights = nn.get_weights()
     F = []
     for _ in range(5):
@@ -125,7 +126,7 @@ def muta(nn):
             l=[]
             shape = layer.shape
             for gene in np.nditer(layer):
-                l.append(gene + np.random.normal(0, 0.5))
+                l.append(gene + np.random.normal(0, alpha))
             l = np.array(l).reshape(shape)
             f.append(l)
         F.append( NeuroNet(f) )
@@ -165,8 +166,8 @@ def fit_scale():
         for _ in range(10):
             env.play()
     player_controller.fit_scale()
+GA(100,10)
 
-GA(60,10)
 
 fim = time.time() # prints total execution time for experiment
 
