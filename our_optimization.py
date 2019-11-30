@@ -27,10 +27,11 @@ env = Environment(
     player_controller=player_controller,
     enemymode="static",
     level=2,
-    speed="fastest"
+    speed="fastest",
+    timeexpire=600
 )
 
-enemies = (3,4,6,7)
+enemies = (1,3,6,7)
 
 class NeuroNet:
     def __init__(self, weights=None):
@@ -46,15 +47,16 @@ class NeuroNet:
         return self.weights
 
 def GA(n_iter, n_pop):
+    f_num = n_pop
     start, P = start_or_load(n_iter, n_pop)
+    alpha_muta = 1/n_iter
     if start == 0:
         evaluate(P)
-    f_num = 20
     for it in range(start, n_iter):
         print(it)
         print(P[0].fitness)
         F = [muta(nn, 0.5) for nn in crossover2(P, f_num)]
-        F += [muta(nn, 1-(0.01*it)) for nn in P]
+        F += [muta(nn, 1-(alpha_muta*it)) for nn in P]
         P = F
         P = select(P, n_pop)
         if it%20 == 0 and it != 0:
@@ -107,6 +109,7 @@ def crossover2(P, n):
         w2 = calc_weights(pair[1], 1 - a)
         w = [(w1[j] + w2[j]) for j in range(len(w1))]
         F.append( NeuroNet(w) )
+    evaluate(F)
     return F
 
 def muta(nn, alpha):
@@ -134,7 +137,6 @@ ini = time.time()  # sets time marker
 
 # runs simulation
 def simulation(env,y):
-    print(y.get_weights())
     player_controller.set_weights(y.get_weights())
     f,p,e,t = env.play(pcont=y) #fitness, playerlife, enemylife, gametime
     return f
