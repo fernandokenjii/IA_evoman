@@ -113,10 +113,10 @@ class Environment(object):
             flags =  DOUBLEBUF  |  FULLSCREEN
         else:
             flags =  DOUBLEBUF
-        
+
         if self.fullscreen:
             flags =  DOUBLEBUF  |  FULLSCREEN
-            
+
         self.screen = pygame.display.set_mode((736, 512), flags)
 
         self.screen.set_alpha(None) # disables uneeded alpha
@@ -570,7 +570,7 @@ class Environment(object):
 
             # game runtime limit
             if self.playermode == 'ai':
-                if self.time >= enemy.timeexpire:
+                if self.time >= self.timeexpire:
                     return return_run()
 
             else:

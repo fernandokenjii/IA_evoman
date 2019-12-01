@@ -13,10 +13,6 @@ import glob, os
 import math
 
 
-from keras.models import Sequential
-from keras.layers import Dense
-import keras.initializers as keras_init
-
 experiment_name = 'our_tests'
 if not os.path.exists(experiment_name):
     os.makedirs(experiment_name)
@@ -39,17 +35,16 @@ enemies = (1,3,6,7)
 
 class NeuroNet:
     def __init__(self, weights=None):
-        model = Sequential()
-        model.add(Dense(20, kernel_initializer=keras_init.RandomUniform(minval=-.5, maxval=.5), activation='tanh', input_dim=10)) # TODO: check right activation function
-        model.add(Dense(10, kernel_initializer=keras_init.RandomUniform(minval=-0.5, maxval=0.5), activation='tanh')) # TODO: check right activation function
-        model.add(Dense(5, activation='sigmoid')) # output
-        if (weights != None):
-            model.set_weights(weights)
-        self.model = model
+        self.weights = []
+        if (weights is not None):
+            self.weights = weights
+        else:
+            for shape in player_controller.get_shapes():
+                self.weights.append(np.random.uniform(-1, 1, shape))
         self.fitness = -math.inf
 
     def get_weights(self):
-        return self.model.get_weights()
+        return self.weights
 
 def GA(n_iter, n_pop):
     f_num = n_pop
@@ -142,6 +137,7 @@ ini = time.time()  # sets time marker
 
 # runs simulation
 def simulation(env,y):
+    player_controller.set_weights(y.get_weights())
     f,p,e,t = env.play(pcont=y) #fitness, playerlife, enemylife, gametime
     return f
 
@@ -169,6 +165,3 @@ def fit_scale():
 GA(100,10)
 
 
-fim = time.time() # prints total execution time for experiment
-
-env.state_to_log() # checks environment state
