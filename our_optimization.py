@@ -53,8 +53,9 @@ def GA(n_iter, n_pop):
     if start == 0:
         evaluate(P)
     for it in range(start, n_iter):
-        print(it)
-        print(P[0].fitness)
+        log_str = f'GENERATION: {it} | BEST FITNESS: {P[0].fitness}'
+        print(log_str)
+        log_to_file(log_str)
         F = [muta(nn, 0.5) for nn in crossover2(P, f_num)]
         F += [muta(nn, 1-(alpha_muta*it)) for nn in P]
         P = F
@@ -162,6 +163,11 @@ def fit_scale():
         for _ in range(10):
             env.play()
     player_controller.fit_scale()
+
+def log_to_file(str):
+    file = open(experiment_name+'/results.txt', 'a')
+    file.write(str + "\n")
+    file.close()
 GA(100,10)
 
 
