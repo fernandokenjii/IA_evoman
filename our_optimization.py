@@ -12,6 +12,7 @@ import pickle
 import glob, os
 import math
 
+mode = 'train'
 
 experiment_name = 'our_tests'
 if not os.path.exists(experiment_name):
@@ -52,21 +53,22 @@ def GA(n_iter, n_pop):
     alpha_muta = 1/n_iter
     if start == 0:
         evaluate(P)
-    for it in range(start, n_iter):
-        log_str = f'GENERATION: {it} | BEST FITNESS: {P[0].fitness}'
-        print(log_str)
-        log_to_file(log_str)
-        F = [muta(nn, 0.5) for nn in crossover2(P, f_num)]
-        F += [muta(nn, 1-(alpha_muta*it)) for nn in P]
-        P = F
-        P = select(P, n_pop)
-        if it%20 == 0 and it != 0:
-            P = P[:5]
-            N = [NeuroNet() for _ in range(f_num-5)]
-            evaluate(N)
-            F = [muta(nn, 0.5) for nn in N]
-            P += F
-        pickle.dump([it+1, P, player_controller.scale], open(experiment_name+'/Evoman.pkl', 'wb'))
+    if mode.lower() != 'test':
+        for it in range(start, n_iter):
+            log_str = f'GENERATION: {it} | BEST FITNESS: {P[0].fitness}'
+            print(log_str)
+            log_to_file(log_str)
+            F = [muta(nn, 0.5) for nn in crossover2(P, f_num)]
+            F += [muta(nn, 1-(alpha_muta*it)) for nn in P]
+            P = F
+            P = select(P, n_pop)
+            if it%20 == 0 and it != 0:
+                P = P[:5]
+                N = [NeuroNet() for _ in range(f_num-5)]
+                evaluate(N)
+                F = [muta(nn, 0.5) for nn in N]
+                P += F
+            pickle.dump([it+1, P, player_controller.scale], open(experiment_name+'/Evoman.pkl', 'wb'))
     # os.remove('Evoman.pkl')
     env.update_parameter('speed', "normal")
     for en in enemies:
@@ -81,7 +83,7 @@ def GA(n_iter, n_pop):
 def start_or_load(n_iter, n_pop):
     if os.path.exists(experiment_name+'/Evoman.pkl'):
         a = pickle.load(open(experiment_name+'/Evoman.pkl', 'rb'))
-        if a[0] < n_iter:
+        if a[0] < n_iter or mode.lower() == 'test':
             player_controller.scale = a[2]
             return a[0], a[1]
     fit_scale()
