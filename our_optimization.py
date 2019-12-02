@@ -20,6 +20,9 @@ if not os.path.exists(experiment_name):
 
 player_controller = player_controller()
 
+if mode.lower() != 'test':
+    os.environ['SDL_VIDEODRIVER'] = 'dummy'
+
 # initializes simulation in individual evolution mode, for single static enemy.
 env = Environment(
     experiment_name=experiment_name,
