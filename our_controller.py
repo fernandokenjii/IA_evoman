@@ -15,8 +15,8 @@ def norm(v):
 class player_controller(Controller):
     def __init__(self):
         model = Sequential()
-        model.add(Dense(20, activation='relu', input_dim=14)) # TODO: check right activation function
-        model.add(Dense(10, activation='relu')) # TODO: check right activation function
+        model.add(Dense(32, activation='relu', input_dim=14)) # TODO: check right activation function
+        model.add(Dense(12, activation='relu')) # TODO: check right activation function
         model.add(Dense(5, activation='sigmoid')) # output
         self.model = model
         weights = model.get_weights()

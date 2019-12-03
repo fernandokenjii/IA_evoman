@@ -12,7 +12,7 @@ import pickle
 import glob, os
 import math
 
-mode = 'train'
+mode = 'test'
 
 experiment_name = 'our_tests'
 if not os.path.exists(experiment_name):
@@ -164,6 +164,6 @@ def log_to_file(str):
     file = open(experiment_name+'/results.txt', 'a')
     file.write(str + "\n")
     file.close()
-GA(100,10)
+GA(150,10)
 
 
