@@ -1,2 +1,18 @@
 # IA_evoman
 Projeto da disciplina de Inteligência Artificial UFABC
+
+## Arquivos
+Nossos arquivos são os `our_controller.py` e `our_optimization.py`.  
+Os resultados são gravados na pasta `our_tests`, sendo eles:
+* _evoman_logs.txt_: os logs do evoman
+* _results.txt_: log das gerações e melhor fitness da população
+* _Evoman.pkl_: pesos das redes da população
+
+## Executando
+
+Para executar o programa, utilize o comando `python3 our_optimization.py`.  
+
+É possível alternar entre o modo de treino e teste, mudando o valor da flag `mode` no arquivo `our_optimization.py` para _'train'_ ou _'test'_. Também é possível definir os inimigos que serão utilizados para o treino, por meio da variável `enemies`, no mesmo arquivo.
+
+No mode de treino, a interface gráfica é desativada e, ao final das iterações definidas ao instânciar a classe _GA_, é feito um teste com todos os bosses.
+
