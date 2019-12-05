@@ -8,6 +8,21 @@ Os resultados são gravados na pasta `our_tests`, sendo eles:
 * [results.txt](our_tests/results.txt): log das gerações e melhor fitness da população
 * [Evoman.pkl](our_tests/Evoman.pkl): pesos das redes da população
 
+## Preparando o ambiente
+Verifique se o python3 está presente em seu computador através do comando `python3 --version`
+
+Caso não esteja, instale-o:  
+
+**Ubuntu/Debian:**  
+`sudo apt-get install python3`  
+`sudo apt-get install python3-pip`
+
+Instale também as bibliotecas utilizadas:  
+`pip3 install Keras`  
+`pip3 install numpy`  
+`pip3 install tensorflow`  
+`pip3 install pygame`  
+
 ## Executando
 
 Para executar o programa, utilize o comando `python3 our_optimization.py`.  
