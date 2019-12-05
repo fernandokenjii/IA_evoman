@@ -1,20 +1,22 @@
 from controller import Controller
 import numpy as np
-from sklearn.preprocessing import MinMaxScaler
 
 from keras.models import Sequential
 from keras.layers import Dense
 import keras.initializers as keras_init
 
-
+def norm(v):
+    if (v == 0):
+        return 0
+    sinal = 1 if (v > 0) else -1
+    return sinal * 2 ** (-(v / 150)**2)
+    
 # implements controller structure for player
 class player_controller(Controller):
     def __init__(self):
-        self.scale = MinMaxScaler((-1,1))
-        self.x_train = []
         model = Sequential()
-        model.add(Dense(20, activation='tanh', input_dim=10)) # TODO: check right activation function
-        model.add(Dense(10, activation='tanh')) # TODO: check right activation function
+        model.add(Dense(32, activation='relu', input_dim=14)) # TODO: check right activation function
+        model.add(Dense(12, activation='relu')) # TODO: check right activation function
         model.add(Dense(5, activation='sigmoid')) # output
         self.model = model
         weights = model.get_weights()
@@ -25,21 +27,24 @@ class player_controller(Controller):
     def control(self, inputs, controller):
         threshold = 0.5
         # turn player's actual direction into 'is player looking at opponent?'
-        # inputs[2] = 0 if (inputs[0]<0) ^ (inputs[2]>0) else 1
+        inputs[2] = 0 if (inputs[0]<0) ^ (inputs[2]>0) else 1
+        inputs[0] = norm(inputs[0])
+        inputs[1] = norm(inputs[1])
 
         projectile = inputs[4:].reshape((-1,2))
         dist = np.sqrt(np.sum((projectile) ** 2, axis=1)).reshape((-1,1))
         a = np.hstack((projectile, dist)) # Concatenate each position with its distance
         a = a[a[:,2].argsort()] # Order rows by the third column (distance)
         a = a[:,:2] # Remove distances from array
-        a = a[:3,].flatten()
+        a = a[:5,].flatten()
+        a = list(map(norm, a))
         inputs = np.concatenate((inputs[:4], a))
 
         if controller is 'None':
             self.x_train.append(inputs)
             return [np.random.choice([1,0]) for _ in range(5)]
 
-        inputs = self.scale.transform([inputs])
+        inputs = np.reshape(inputs, (-1, 14))
         output = self.model.predict(inputs)
         output=output[0]
         actions = np.where(output>threshold, 1, 0)

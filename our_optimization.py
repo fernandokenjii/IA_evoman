@@ -12,7 +12,7 @@ import pickle
 import glob, os
 import math
 
-mode = 'train'
+mode = 'test'
 
 experiment_name = 'our_tests'
 if not os.path.exists(experiment_name):
@@ -71,7 +71,7 @@ def GA(n_iter, n_pop):
                 evaluate(N)
                 F = [muta(nn, 0.5) for nn in N]
                 P += F
-            pickle.dump([it+1, P, player_controller.scale], open(experiment_name+'/Evoman.pkl', 'wb'))
+            pickle.dump([it+1, P], open(experiment_name+'/Evoman.pkl', 'wb'))
     # os.remove('Evoman.pkl')
     env.update_parameter('speed', "normal")
     for en in enemies:
@@ -87,9 +87,7 @@ def start_or_load(n_iter, n_pop):
     if os.path.exists(experiment_name+'/Evoman.pkl'):
         a = pickle.load(open(experiment_name+'/Evoman.pkl', 'rb'))
         if a[0] < n_iter or mode.lower() == 'test':
-            player_controller.scale = a[2]
             return a[0], a[1]
-    fit_scale()
     return 0, [NeuroNet() for _ in range(n_pop)]
 
 def calc_weights(nn, alpha):
@@ -162,17 +160,10 @@ def evaluate(x):
 
     return fitness
 
-def fit_scale():
-    for en in enemies:
-        env.update_parameter('enemies', [en])
-        for _ in range(10):
-            env.play()
-    player_controller.fit_scale()
-
 def log_to_file(str):
     file = open(experiment_name+'/results.txt', 'a')
     file.write(str + "\n")
     file.close()
-GA(100,10)
+GA(150,10)
 
 
