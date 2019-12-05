@@ -2,11 +2,11 @@
 Projeto da disciplina de Inteligência Artificial UFABC
 
 ## Arquivos
-Nossos arquivos são os `our_controller.py` e `our_optimization.py`.  
+Nossos arquivos são os [our_controller.py](our_controller.py) e [our_optimization.py](our_optimization.py).  
 Os resultados são gravados na pasta `our_tests`, sendo eles:
-* _evoman_logs.txt_: os logs do evoman
-* _results.txt_: log das gerações e melhor fitness da população
-* _Evoman.pkl_: pesos das redes da população
+* [evoman_logs.txt](our_tests/evoman_logs.txt): os logs do evoman
+* [results.txt](our_tests/results.txt): log das gerações e melhor fitness da população
+* [Evoman.pkl](our_tests/Evoman.pkl): pesos das redes da população
 
 ## Executando
 
@@ -16,3 +16,5 @@ Para executar o programa, utilize o comando `python3 our_optimization.py`.
 
 No mode de treino, a interface gráfica é desativada e, ao final das iterações definidas ao instânciar a classe _GA_, é feito um teste com todos os bosses.
 
+## Resultados e Conclusões
+Elaboramos um relatório com nossos resultados e conclusões, disponível em [Evoman-Relatorio.pdf](Evoman-Relatorio.pdf)  
