@@ -10,13 +10,14 @@ def norm(v):
         return 0
     sinal = 1 if (v > 0) else -1
     return sinal * 2 ** (-(v / 150)**2)
-    
+
 # implements controller structure for player
 class player_controller(Controller):
-    def __init__(self):
+    def __init__(self, parameters):
+        self.parameters = parameters
         model = Sequential()
-        model.add(Dense(32, activation='relu', input_dim=14)) # TODO: check right activation function
-        model.add(Dense(12, activation='relu')) # TODO: check right activation function
+        model.add(Dense(parameters['layer1_shape'], activation=parameters['layer_activation'], input_dim=14))
+        model.add(Dense(parameters['layer2_shape'], activation=parameters['layer_activation']))
         model.add(Dense(5, activation='sigmoid')) # output
         self.model = model
         weights = model.get_weights()
@@ -36,7 +37,7 @@ class player_controller(Controller):
         a = np.hstack((projectile, dist)) # Concatenate each position with its distance
         a = a[a[:,2].argsort()] # Order rows by the third column (distance)
         a = a[:,:2] # Remove distances from array
-        a = a[:5,].flatten()
+        a = a[:self.parameters['number_of_projectiles'],].flatten()
         a = list(map(norm, a))
         inputs = np.concatenate((inputs[:4], a))
 

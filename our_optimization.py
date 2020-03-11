@@ -7,18 +7,33 @@ from our_controller import player_controller
 # imports other libs
 import time
 import numpy as np
-from math import fabs,sqrt
 import pickle
 import glob, os
 import math
 
 mode = 'test'
 
+parameters = {
+    'enemies' : (1,3,6,7),
+    'timeexpire' : 600,
+    'number_of_iterations' : 150,
+    'population_size' : 10,
+    'generated_on_mutation' : 5,
+    'mutation_alpha' : 0.5,              # using after doomsday and crossover
+    'doomsday_interval' : 20,
+    'doomsday_survivals' : 5,
+    'neuronet_inicialization' : (-1,1),
+    'layer1_shape' : 32,
+    'layer2_shape' : 12,
+    'layer_activation' : 'relu',
+    'number_of_projectiles' : 5
+}
+
 experiment_name = 'our_tests'
 if not os.path.exists(experiment_name):
     os.makedirs(experiment_name)
 
-player_controller = player_controller()
+player_controller = player_controller(parameters)
 
 if mode.lower() != 'test':
     os.environ['SDL_VIDEODRIVER'] = 'dummy'
@@ -32,10 +47,10 @@ env = Environment(
     enemymode="static",
     level=2,
     speed="fastest",
-    timeexpire=600
+    timeexpire=parameters["timeexpire"]
 )
 
-enemies = (1,3,6,7)
+enemies = parameters['enemies']
 
 class NeuroNet:
     def __init__(self, weights=None):
@@ -44,7 +59,7 @@ class NeuroNet:
             self.weights = weights
         else:
             for shape in player_controller.get_shapes():
-                self.weights.append(np.random.uniform(-1, 1, shape))
+                self.weights.append(np.random.uniform(*parameters['neuronet_inicialization'], shape))
         self.fitness = -math.inf
 
     def get_weights(self):
@@ -61,15 +76,15 @@ def GA(n_iter, n_pop):
             log_str = f'GENERATION: {it} | BEST FITNESS: {P[0].fitness}'
             print(log_str)
             log_to_file(log_str)
-            F = [muta(nn, 0.5) for nn in crossover2(P, f_num)]
+            F = [muta(nn, parameters['mutation_alpha']) for nn in crossover(P, f_num)]
             F += [muta(nn, 1-(alpha_muta*it)) for nn in P]
             P = F
             P = select(P, n_pop)
-            if it%20 == 0 and it != 0:
-                P = P[:5]
-                N = [NeuroNet() for _ in range(f_num-5)]
+            if it%parameters['doomsday_interval'] == 0 and it != 0:
+                P = P[:parameters['doomsday_survivals']]
+                N = [NeuroNet() for _ in range(f_num-parameters['doomsday_survivals'])]
                 evaluate(N)
-                F = [muta(nn, 0.5) for nn in N]
+                F = [muta(nn, parameters['mutation_alpha']) for nn in N]
                 P += F
             pickle.dump([it+1, P], open(experiment_name+'/Evoman.pkl', 'wb'))
     # os.remove('Evoman.pkl')
@@ -96,15 +111,6 @@ def calc_weights(nn, alpha):
     return new_weights
 
 def crossover(P, n):
-    F=[]
-    weight1 = calc_weights(P[0], 0.5)
-    for i in range(1, n):
-        weight2 = calc_weights(P[i], 0.5)
-        weight = [(weight1[j] + weight2[j]) for j in range(len(weight1))]
-        F.append( NeuroNet(weight) )
-    return F
-
-def crossover2(P, n):
     F = []
     pairs = np.random.choice(P, (n//2, 2), False)
     for pair in pairs:
@@ -119,7 +125,7 @@ def crossover2(P, n):
 def muta(nn, alpha):
     weights = nn.get_weights()
     F = []
-    for _ in range(5):
+    for _ in range(parameters['generated_on_mutation']):
         f = []
         for layer in weights:
             l=[]
@@ -164,6 +170,7 @@ def log_to_file(str):
     file = open(experiment_name+'/results.txt', 'a')
     file.write(str + "\n")
     file.close()
-GA(150,10)
+
+GA(parameters['number_of_iterations'], parameters['population_size'])
 
 
