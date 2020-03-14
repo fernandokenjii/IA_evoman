@@ -7,6 +7,8 @@ from our_controller import player_controller
 # imports other libs
 import time
 import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
 import pickle
 import glob, os
 import math
@@ -27,6 +29,13 @@ parameters = {
     'layer2_shape' : 12,
     'layer_activation' : 'relu',
     'number_of_projectiles' : 5
+}
+
+best_agents = {
+    'first' : [],
+    'second' : [],
+    'third' : [],
+    'agent' : []
 }
 
 experiment_name = 'our_tests'
@@ -55,6 +64,7 @@ enemies = parameters['enemies']
 class NeuroNet:
     def __init__(self, weights=None):
         self.weights = []
+        self.results = None
         if (weights is not None):
             self.weights = weights
         else:
@@ -80,28 +90,68 @@ def GA(n_iter, n_pop):
             F += [muta(nn, 1-(alpha_muta*it)) for nn in P]
             P = F
             P = select(P, n_pop)
+            best_agents['first'].append(test_agent(P[0]))
+            best_agents['agent'].append(P[0])
+            best_agents['second'].append(test_agent(P[1]))
+            best_agents['third'].append(test_agent(P[2]))
             if it%parameters['doomsday_interval'] == 0 and it != 0:
                 P = P[:parameters['doomsday_survivals']]
                 N = [NeuroNet() for _ in range(f_num-parameters['doomsday_survivals'])]
                 evaluate(N)
                 F = [muta(nn, parameters['mutation_alpha']) for nn in N]
                 P += F
-            pickle.dump([it+1, P], open(experiment_name+'/Evoman.pkl', 'wb'))
+            pickle.dump([it+1, P, best_agents], open(experiment_name+'/Evoman.pkl', 'wb'))
     # os.remove('Evoman.pkl')
     env.update_parameter('speed', "normal")
+    df = pd.DataFrame(best_agents['first'])
+    plt.plot(df['result'], label='mean')
+    plt.plot(df['fitness'], label='fitness')
+    plt.legend()
+    plt.savefig(experiment_name+'/results.png')
+    plt.close('all')
+    best = best_agents['agent'][df['result'].idxmax()]
+    df.to_csv(experiment_name+'/results.csv')
     for en in enemies:
         env.update_parameter('enemies', [en])
-        simulation(env, P[0])
+        simulation(env, best)
     others = [en for en in range(1, 9) if en not in enemies]
     for en in others:
         env.update_parameter('enemies', [en])
-        simulation(env, P[0])
+        simulation(env, best)
     return P
+
+def test_agent(agent):            # use after select function only
+    if agent.results is not None:
+        return agent.results
+    results = {}
+    avarage_helper = []
+    for en in enemies:
+        env.update_parameter('enemies', [en])
+        f, *x, t = simulation(env, agent)
+        avarage_helper.append(x)
+        results[en] = x
+    results['avarage_train'] = np.mean(avarage_helper, axis=0)
+    avarage_helper = []
+    others = [en for en in range(1, 9) if en not in enemies]
+    for en in others:
+        env.update_parameter('enemies', [en])
+        f, *x, t = simulation(env, agent)
+        avarage_helper.append(x)
+        results[en] = x
+    results['avarage_test'] = np.mean(avarage_helper, axis=0)
+    results['avarage'] = np.mean((results['avarage_train'], results['avarage_test']), axis=0)
+    results['result'] = np.mean((results['avarage'][0], 100 - results['avarage'][1]))
+    results['fitness'] = agent.fitness
+    agent.results = results
+    return results
+
 
 def start_or_load(n_iter, n_pop):
     if os.path.exists(experiment_name+'/Evoman.pkl'):
         a = pickle.load(open(experiment_name+'/Evoman.pkl', 'rb'))
         if a[0] < n_iter or mode.lower() == 'test':
+            global best_agents
+            best_agents = a[2]
             return a[0], a[1]
     return 0, [NeuroNet() for _ in range(n_pop)]
 
@@ -149,14 +199,14 @@ ini = time.time()  # sets time marker
 def simulation(env,y):
     player_controller.set_weights(y.get_weights())
     f,p,e,t = env.play(pcont=y) #fitness, playerlife, enemylife, gametime
-    return f
+    return f, p, e, t
 
 # evaluation
 def evaluate(x):
     fitness=[]
     for en in enemies:
         env.update_parameter('enemies', [en])
-        fitness.append((list(map(lambda y: simulation(env,y), x))))
+        fitness.append((list(map(lambda y: simulation(env,y)[0], x))))
     arrray = np.array(fitness)
     fitness = arrray.sum(axis=0)
     fitness /= 8
