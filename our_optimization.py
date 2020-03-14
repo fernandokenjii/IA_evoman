@@ -86,9 +86,9 @@ def GA(n_iter, n_pop):
             log_str = f'GENERATION: {it} | BEST FITNESS: {P[0].fitness}'
             print(log_str)
             log_to_file(log_str)
-            F = [muta(nn, parameters['mutation_alpha']) for nn in crossover(P, f_num)]
-            F += [muta(nn, 1-(alpha_muta*it)) for nn in P]
-            P = F
+            F = [muta(nn, 1-(alpha_muta*it)) for nn in P]
+            G = [muta(nn, parameters['mutation_alpha']) for nn in crossover(P, f_num)]
+            P = F + G
             P = select(P, n_pop)
             best_agents['first'].append(test_agent(P[0]))
             best_agents['agent'].append(P[0])
@@ -186,7 +186,7 @@ def muta(nn, alpha):
             f.append(l)
         F.append( NeuroNet(f) )
     evaluate(F)
-    F.append(nn)
+    F.insert(0, nn)
     return select(F, 1)[0]
 
 def select(P, n):
