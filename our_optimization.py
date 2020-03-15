@@ -8,12 +8,13 @@ from our_controller import player_controller
 import time
 import numpy as np
 import pandas as pd
+from scipy.stats import hmean
 import matplotlib.pyplot as plt
 import pickle
 import glob, os
 import math
 
-mode = 'train'
+mode = 'test'
 
 parameters = {
     'enemies' : (1,3,6,7),
@@ -127,22 +128,25 @@ def test_agent(agent):            # use after select function only
         return agent.results
     results = {}
     avarage_helper = []
+    gains = []
     for en in enemies:
         env.update_parameter('enemies', [en])
-        f, *x, t = simulation(env, agent)
-        avarage_helper.append(x)
-        results[en] = x
+        f, p, e, t = simulation(env, agent)
+        avarage_helper.append([p, e])
+        results[en] = [p, e, 100.01 + p - e]
+        gains.append(100.01 + p - e)
     results['avarage_train'] = np.mean(avarage_helper, axis=0)
     avarage_helper = []
     others = [en for en in range(1, 9) if en not in enemies]
     for en in others:
         env.update_parameter('enemies', [en])
-        f, *x, t = simulation(env, agent)
-        avarage_helper.append(x)
-        results[en] = x
+        f, p, e, t = simulation(env, agent)
+        avarage_helper.append([p, e])
+        results[en] = [p, e, 100.01 + p - e]
+        gains.append(100.01 + p - e)
     results['avarage_test'] = np.mean(avarage_helper, axis=0)
     results['avarage'] = np.mean((results['avarage_train'], results['avarage_test']), axis=0)
-    results['result'] = np.mean((results['avarage'][0], 100 - results['avarage'][1]))
+    results['result'] = hmean(gains)
     results['fitness'] = agent.fitness
     agent.results = results
     return results
