@@ -13,21 +13,23 @@ import pickle
 import glob, os
 import math
 
-mode = 'test'
+mode = 'train'
 
 parameters = {
     'enemies' : (1,3,6,7),
     'timeexpire' : 600,
-    'number_of_iterations' : 150,
+    'number_of_iterations' : 230,
     'population_size' : 10,
     'generated_on_mutation' : 5,
     'mutation_alpha' : 0.5,              # using after doomsday and crossover
     'doomsday_interval' : 20,
     'doomsday_survivals' : 5,
     'neuronet_inicialization' : (-1,1),
-    'layer1_shape' : 32,
-    'layer2_shape' : 12,
-    'layer_activation' : 'relu',
+    'layers' : [
+        {'units':32, 'activation':'relu', 'input_dim':14},
+        {'units':12, 'activation':'relu'},
+        {'units':5, 'activation':'sigmoid'} #output
+    ],
     'number_of_projectiles' : 5
 }
 

@@ -16,9 +16,8 @@ class player_controller(Controller):
     def __init__(self, parameters):
         self.parameters = parameters
         model = Sequential()
-        model.add(Dense(parameters['layer1_shape'], activation=parameters['layer_activation'], input_dim=14))
-        model.add(Dense(parameters['layer2_shape'], activation=parameters['layer_activation']))
-        model.add(Dense(5, activation='sigmoid')) # output
+        for layer in parameters['layers']:
+            model.add(Dense(**layer))
         self.model = model
         weights = model.get_weights()
         self.shapes = []
