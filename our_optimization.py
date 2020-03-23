@@ -14,21 +14,22 @@ import pickle
 import glob, os
 import math
 
-mode = 'test'
+mode = 'train'
 
 parameters = {
-    'enemies' : (1,3,6,7),
+    'enemies' : (1,4,6,7),
     'timeexpire' : 600,
-    'number_of_iterations' : 230,
+    'number_of_iterations' : 150,
     'population_size' : 10,
     'generated_on_mutation' : 5,
     'mutation_alpha' : 0.5,              # using after doomsday and crossover
     'doomsday_interval' : 20,
     'doomsday_survivals' : 5,
     'neuronet_inicialization' : (-1,1),
+    'gamma' : 0.7,
     'layers' : [
-        {'units':32, 'activation':'relu', 'input_dim':14},
-        {'units':12, 'activation':'relu'},
+        {'units':32, 'activation':'sigmoid', 'input_dim':14},
+        {'units':12, 'activation':'sigmoid'},
         {'units':5, 'activation':'sigmoid'} #output
     ],
     'number_of_projectiles' : 5
@@ -106,6 +107,7 @@ def GA(n_iter, n_pop):
             pickle.dump([it+1, P, best_agents], open(experiment_name+'/Evoman.pkl', 'wb'))
     # os.remove('Evoman.pkl')
     env.update_parameter('speed', "normal")
+    env.update_parameter('timeexpire', 3000)
     df = pd.DataFrame(best_agents['first'])
     plt.plot(df['result'], label='mean')
     plt.plot(df['fitness'], label='fitness')
@@ -129,11 +131,12 @@ def test_agent(agent):            # use after select function only
     results = {}
     avarage_helper = []
     gains = []
+    env.update_parameter('timeexpire', 3000)
     for en in enemies:
         env.update_parameter('enemies', [en])
         f, p, e, t = simulation(env, agent)
         avarage_helper.append([p, e])
-        results[en] = [p, e, 100.01 + p - e]
+        results[en] = [p, e]
         gains.append(100.01 + p - e)
     results['avarage_train'] = np.mean(avarage_helper, axis=0)
     avarage_helper = []
@@ -142,13 +145,14 @@ def test_agent(agent):            # use after select function only
         env.update_parameter('enemies', [en])
         f, p, e, t = simulation(env, agent)
         avarage_helper.append([p, e])
-        results[en] = [p, e, 100.01 + p - e]
+        results[en] = [p, e]
         gains.append(100.01 + p - e)
     results['avarage_test'] = np.mean(avarage_helper, axis=0)
     results['avarage'] = np.mean((results['avarage_train'], results['avarage_test']), axis=0)
     results['result'] = hmean(gains)
     results['fitness'] = agent.fitness
     agent.results = results
+    env.update_parameter('timeexpire', parameters['timeexpire'])
     return results
 
 
@@ -204,7 +208,8 @@ ini = time.time()  # sets time marker
 # runs simulation
 def simulation(env,y):
     player_controller.set_weights(y.get_weights())
-    f,p,e,t = env.play(pcont=y) #fitness, playerlife, enemylife, gametime
+    _ ,p,e,t = env.play(pcont=y) #fitness, playerlife, enemylife, gametime
+    f = parameters['gamma'] * (100-e) + (1-parameters['gamma']) * p - math.log(t)
     return f, p, e, t
 
 # evaluation
