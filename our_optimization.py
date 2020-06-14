@@ -14,7 +14,7 @@ import pickle
 import glob, os
 import math
 
-mode = 'train'
+mode = 'test'
 
 parameters = {
     'enemies' : (1,4,6,7),
