@@ -1,35 +1,60 @@
 # IA_evoman
-Projeto da disciplina de Inteligência Artificial UFABC
+Project developed to the WCCI competition, first introduced on UFABC's Artificial Intelligence class.
 
-## Arquivos
-Nossos arquivos são os [our_controller.py](our_controller.py) e [our_optimization.py](our_optimization.py).  
-Os resultados são gravados na pasta `our_tests`, sendo eles:
-* [evoman_logs.txt](our_tests/evoman_logs.txt): os logs do evoman
-* [results.txt](our_tests/results.txt): log das gerações e melhor fitness da população
-* [Evoman.pkl](our_tests/Evoman.pkl): pesos das redes da população
+## Files
 
-## Preparando o ambiente
-Verifique se o python3 está presente em seu computador através do comando `python3 --version`
+* [our_controller.py](our_controller.py): Creates the Artificial Neural Network, preprocess inputs and sends the agent's actions to the game.
+* [our_optimization.py](our_optimization.py): Defines the environment and the Genetic Algorithm.
 
-Caso não esteja, instale-o:  
+The outputs are presented in the `tests` folder, containing:
+* [evoman_logs.txt](our_tests/evoman_logs.txt): logs from evoman generated during execution
+* [results.txt](our_tests/results.txt): logs generations and their best fitness
+* [Evoman.pkl](our_tests/Evoman.pkl): all ANN weights
+* [results.csv](results.csv): the results for each iteration containing:
+  - each train boss fight result and their average
+  - each test boss fight result and their average
+  - global average
+  - gain (harmonic mean)
+  - our custom fitness
+* [results.png](results.png): the graphic between the gain and the fitness function on each iteration
 
-**Ubuntu/Debian:**  
-`sudo apt-get install python3`  
-`sudo apt-get install python3-pip`
+## Environment set-up
 
-Instale também as bibliotecas utilizadas:  
-`pip3 install Keras`  
-`pip3 install numpy`  
-`pip3 install tensorflow`  
-`pip3 install pygame`  
+Make sure you have python 3.6 or 3.7, pip and venv dependencies installed.
+If not, you can install them using:
 
-## Executando
+**Ubuntu/Debian:**
 
-Para executar o programa, utilize o comando `python3 our_optimization.py`.  
+```bash
+sudo apt-get install python3
+sudo apt-get install python3-pip
+sudo apt-get install python3-venv
+```
 
-É possível alternar entre o modo de treino e teste, mudando o valor da flag `mode` no arquivo `our_optimization.py` para _'train'_ ou _'test'_. Também é possível definir os inimigos que serão utilizados para o treino, por meio da variável `enemies`, no mesmo arquivo.
+Then install the dependencies:
+```bash
+# Create a new virtual environment
+python3 -m venv env
 
-No mode de treino, a interface gráfica é desativada e, ao final das iterações definidas ao instânciar a classe _GA_, é feito um teste com todos os bosses.
+# Activate the environment
+source env/bin/activate
 
-## Resultados e Conclusões
-Elaboramos um relatório com nossos resultados e conclusões, disponível em [Evoman-Relatorio.pdf](Evoman-Relatorio.pdf)  
+# Upgrade pip version
+pip install --upgrade pip
+
+# Install all required dependencies
+pip install -r requirements.txt
+```
+
+## Running
+
+Make sure that venv is active, then to run the program, execute `python our_optimization.py`
+
+You can change between the train and test modes by editing the *mode* variable to *'train'* or *'test'*.
+It's also possible to select the enemies for the training phase editing the *enemies* variable in the same file.
+
+On train mode, the graphic interface is deactivated and, at the end of iterations (defined on _GA_ class), it runs a final test with the best agent.
+
+## Results and Conclusions
+
+We present our results and conclusions in [this paper](Evoman_WCCI_Competition.pdf).
