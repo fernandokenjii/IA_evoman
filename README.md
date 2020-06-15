@@ -6,7 +6,7 @@ Project developed to the WCCI competition, first introduced on UFABC's Artificia
 * [our_controller.py](our_controller.py): Creates the Artificial Neural Network, preprocess inputs and sends the agent's actions to the game.
 * [our_optimization.py](our_optimization.py): Defines the environment and the Genetic Algorithm.
 
-The outputs are presented in the `tests` folder, containing:
+The outputs are presented in the `our_tests` folder, containing:
 * [evoman_logs.txt](our_tests/evoman_logs.txt): logs from evoman generated during execution
 * [results.txt](our_tests/results.txt): logs generations and their best fitness
 * [Evoman.pkl](our_tests/Evoman.pkl): all ANN weights
